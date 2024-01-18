@@ -62,7 +62,11 @@ function hideContextMenu() {
     contextMenu.style.display = 'none';
     document.removeEventListener('click', hideContextMenu);
 }
-
+function hideDetails() {
+    const contextMenu = document.getElementById('details');
+    contextMenu.style.display = 'none';
+    document.removeEventListener('click', hideDetails);
+}
 
 const createPokemonCard = (pokemon) => {
     const pokemonEl = document.createElement('div')
@@ -142,7 +146,7 @@ const createPokemonCard = (pokemon) => {
                 `
                 details.style.left = `${event.clientX}px`;
                 details.style.top = `${event.clientY}px`;
-                
+                pokemonEl.addEventListener('click',hideDetails)
             }
             hideContextMenu();
             
@@ -156,12 +160,6 @@ const createPokemonCard = (pokemon) => {
 
 }
 
-//   const seat1= document.createElement("div");
-//   seat1.classList.add("seat_places");
-//   seat1.innerHTML=`<p>total: 0 GEL</p>`
-//   seat1.addEventListener("click", (e) => {
-//     window.location.href = "payment.html"
-//   })
 
 getRandPokemon()
 fetchPokemon()
