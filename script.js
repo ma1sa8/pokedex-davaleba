@@ -46,7 +46,7 @@ const getRandPokemon = async ()=>{
         const data = await res.json()
         randPoke.push(data);
   }
-    console.log(randPoke)
+    localStorage.setItem('enemies',JSON.stringify(randPoke))
 }
 
 const getPokemon = async (id) => {
@@ -63,8 +63,8 @@ function hideContextMenu() {
     document.removeEventListener('click', hideContextMenu);
 }
 function hideDetails() {
-    const contextMenu = document.getElementById('details');
-    contextMenu.style.display = 'none';
+    const detailsMenu = document.getElementById('details');
+    detailsMenu.style.display = 'none';
     document.removeEventListener('click', hideDetails);
 }
 
@@ -85,14 +85,14 @@ const createPokemonCard = (pokemon) => {
 
     const pokemonInnerHtml = `
     <span class="number">#${id}</span>
-            <div class="img_container">
-                <img src="${pokemon?.sprites?.other?.dream_world?.front_default}" >
-            </div>
-            <div class="info">
-               
-                <h3 class="name">${name}</h3>
-                <small class="type">type : ${type}</small>
-            </div>
+    <div class="img_container">
+        <img src="${pokemon?.sprites?.other?.dream_world?.front_default}" >
+    </div>
+    <div class="info">
+        
+        <h3 class="name">${name}</h3>
+        <small class="type">type : ${type}</small>
+    </div>
         
     `
     pokemonEl.oncontextmenu = function (event)
@@ -100,16 +100,14 @@ const createPokemonCard = (pokemon) => {
         const contextMenu = document.getElementById('context-menu');
         contextMenu.innerHTML = `
         <ul>
-            <li onclick="menuItemClicked('choose')">choose</li>
-            <li onclick="menuItemClicked('details')">details</li>
+            <li onclick="menuItemClicked('choose')">Select</li>
+            <li onclick="menuItemClicked('details')">Details</li>
         </ul>
         `
         contextMenu.style.left = `${event.clientX}px`;
         contextMenu.style.top = `${event.clientY}px`;
         contextMenu.style.display = 'flex';
         document.addEventListener('click', hideContextMenu);
-        let num = id
-        console.log(num)
         menuItemClicked = function (option){
             if(option=='choose'){
                 pokemons.push(pokemon)
@@ -118,20 +116,86 @@ const createPokemonCard = (pokemon) => {
                     alert('cant choose anymore')
                     pokemons.splice(5, 1)
                     
-                }else if(pokemons.length==5){
+                }else if(pokemons.length<=5){
+                    const pokesContainer = document.getElementById('pokes')
+                    pokesContainer.innerHTML='';
                     pokemons.forEach((pokemon) => {
                         const pokeEl = document.createElement("div")
-                        
+                        const poke_type = pokemon.types.map(type => type.type.name)
+                        const type = main_types.find(type => poke_type.indexOf(type) > -1)
+                        const color = colors[type]
+                        pokeEl.style.backgroundColor = color
                         pokeEl.classList.add("pokemon")
                         pokeEl.innerHTML = `
+                            <span class="number">#${pokemon.id}</span>
                             <div class="img_container">
                                 <img src="${pokemon?.sprites?.other?.dream_world?.front_default}" >
                             </div>
-                            <h2>${pokemon.name}</h2>
-                          `
-                        
+                            <div class="info">
+                                <h3 class="name">${pokemon.name}</h3>
+                                <small class="type">type : ${type}</small>
+                            </div>
+                        `
+                        pokeEl.oncontextmenu = function (event)
+                        {
+                            const contextMenu = document.getElementById('context-menu');
+                            contextMenu.innerHTML = `
+                            <ul>
+                                <li onclick="chosenItemClicked('deselect')">Deselect</li>
+                            </ul>
+                            `
+                            contextMenu.style.left = `${event.clientX}px`;
+                            contextMenu.style.top = `${event.clientY}px`;
+                            contextMenu.style.display = 'flex';
+                            document.addEventListener('click', hideContextMenu);
+                            console.log(pokemon.id)
+                            const index = pokemons.indexOf(pokemon)
+                            console.log(index)
+                            chosenItemClicked = function (option){
+                                if(option=='deselect'){
+                                    pokesContainer.innerHTML='';
+                                    pokemons.splice(index,1)
+                                    
+                                    console.log(pokemons)
+                                    
+                                    pokemons.forEach((pokemon) => {
+                                        const selected = document.createElement("div")
+                                        const poke_type = pokemon.types.map(type => type.type.name)
+                                        const type = main_types.find(type => poke_type.indexOf(type) > -1)
+                                        const color = colors[type]
+                                        selected.style.backgroundColor = color
+                                        selected.classList.add("pokemon")
+                                        selected.innerHTML = `
+                                            <span class="number">#${pokemon.id}</span>
+                                            <div class="img_container">
+                                                <img src="${pokemon?.sprites?.other?.dream_world?.front_default}" >
+                                            </div>
+                                            <div class="info">
+                                                <h3 class="name">${pokemon.name}</h3>
+                                                <small class="type">type : ${type}</small>
+                                            </div>
+                                        `
+                                        const showButton = document.getElementById('butt')
+                                        showButton.style.display = 'none'
+                                        showButton.innerHTML = '';
+                                        pokes?.appendChild(selected)
+                                    })
+                                    
+                                }
+                            }
+                            return false
+                        }
                         pokes?.appendChild(pokeEl)
                     })
+                    if(pokemons.length==5){
+                        const showButton = document.getElementById('butt')
+                        showButton.style.display = 'flex'
+                        showButton.innerHTML = `
+                        <button type="button" id="battle" onclick="sendPokemonsToBattle()">
+                            start battle
+                        </button>
+                        `
+                    }
                 }
             }
             else if (option=='details'){
@@ -146,6 +210,7 @@ const createPokemonCard = (pokemon) => {
                 `
                 details.style.left = `${event.clientX}px`;
                 details.style.top = `${event.clientY}px`;
+                details.style.display = 'flex'
                 pokemonEl.addEventListener('click',hideDetails)
             }
             hideContextMenu();
@@ -159,39 +224,10 @@ const createPokemonCard = (pokemon) => {
     poke_container?.appendChild(pokemonEl)
 
 }
-
-
+const sendPokemonsToBattle = ()=>{
+    localStorage.setItem('pokemons',JSON.stringify(pokemons))
+    window.location.href = "battle.html"
+}
 getRandPokemon()
 fetchPokemon()
 
-// function menuItemClicked(option) {
-//     if(option=='option 1'){
-//         console.log(createPokemonCard.pokemon.id)
-//     }
-//     hideContextMenu();
-// }
-// async function () {
-//     const config = {
-//         headers : {
-//             Accept : "application/json"
-//         }
-//     }
-
-//     fetch("https://icanhazdadjoke.com/")
-// }
-
-
-// async function generateJoke() {
-//     const config = {
-//         headers : {
-//             Accept : "application/json"
-//         }
-//     }
-
-//     const res = await fetch("https://icanhazdadjoke.com/", config)
-//     const data = await res.json()
-    
-//    console.log(data.joke)
-// }
-
-// generateJoke()

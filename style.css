@@ -1,3 +1,6 @@
+*{
+    justify-content: center;
+}
 .pokemon{
     width: 150px;
     display: flex;
@@ -7,7 +10,7 @@
     height: 250px;
     border-radius: 16px;
 }
-.poke-container,#pokes{
+.poke-container,#pokes, #enemyTeam, #myTeam{
     display: flex;
     flex-wrap: wrap;
     gap: 50px;
@@ -31,7 +34,7 @@ img{
     align-items: center;
 }
 #details{
-    display: flex;
+    display:none;
     flex-direction: column;
     position: absolute;
     background-color: #fff;
@@ -71,4 +74,12 @@ img{
     align-items: center;
     cursor: pointer;
     margin: 30px 0px 30px 0px;
+}
+hr{
+    margin: 20px 0px 20px 0px;
+}
+#butt{
+    display: none;
+    align-items: center;
+    justify-content: center;
 }
